@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+    {% block head_title %}
+        {{ block.super }} - {{ user }}
+    {% endblock head_title %}
+    
+    {% block content %}
+        <div class="row mt-3">
+            <!-- first card -->
+            <div class="col-4">
+                <div class="card my-2">
+                    <!-- HEADER -->
+                    <div class="card-header">
+                        <h4> {% if request.user == user %} Il tuo {% endif %}Profilo Utente </h4>
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="card-body">
+                        <p class="lead">@{{user}}</p>
+                        <p class="mb-0">Iscrizioni: {{ user.date_joined|date:"d M Y" }}</p>
+                        <p class="mb-0">Discussioni: {{ user.discussioni.count }}</p>
+                        <p class="mb-0">Posts: {{ user.posts.count }}</p>
+                    </div>
+                    <!-- FOOTER -->
+                    <div class="card-footer"></div>
+                </div>
+            </div>
+
+            <!-- second card -->
+            <div class="col-8">  
+                <div class="card my-2">
+                    <!-- HEADER -->
+                    <div class="card-header">
+                        <h4>Discussioni</h4>
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="card-body">
+                        {% for discussione in discussioni_utente  %}
+                        
+                        <a href="{{ discussione.get_absolute_url }}">{{ discussione.titolo }}</a>
+                        <p class="text-muted">{{ discussione.sezione_appartenenza }}</p>
+                        {% empty %}
+                            {% if request.user != user %}
+                                <p class="mb-0">
+                                    {{user}} non ha creato alcuna discussione
+                                </p>
+                            {% else %}
+                                <p class="mb-0">
+                                    Non hai creato alcuna discussione.
+                                </p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div class="card-footer"></div>
+                </div>                     
+            </div>
+        </div>
+    {% endblock content %}

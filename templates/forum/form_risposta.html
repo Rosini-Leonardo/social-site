@@ -1,0 +1,6 @@
+{% load crispy_forms_tags %}
+    <form action="{% url 'risposta_view' pk=discussione.pk %}" class="mb-3" method="POST">
+        {% csrf_token %}
+        {{ form_risposta|crispy }}
+        <input type="submit" class="btn btn-info" value="rispondi">
+    </form>

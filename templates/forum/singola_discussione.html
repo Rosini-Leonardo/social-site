@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+    {% load crispy_forms_tags %}
+    
+    {% block head_title %}
+       {{block.super}} - {{ discussione.titolo }}
+    {% endblock head_title %}
+    
+    {% block content %}
+        {% for post in posts_discussione %}
+        <section class="mt-4">
+            <div class="card my-3">
+
+                {% if forloop.first and not "page" in request.get_full_path %}
+                    <div class="card-header pb-0">
+                        <h3>{{ discussione.titolo }}</h3>
+                        <p class="text-muted">
+                            <!-- date doc: https://docs.djangoproject.com/en/4.0/ref/class-based-views/generic-date-based/ -->
+                            {{ discussione.data_creazione|date:"D d M Y" }}
+                            <br>
+                            in: {{ discussione.sezione_appartenenza }}
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="card-header py-0">
+                        <p class="text-muted mb-0">
+                            {{ post.data_creazione|date:"D d M Y" }}
+                            
+                            {% if request.user == post.autore_post %}
+                                <a href="{% url 'rimuovi_post' id=discussione.pk pk=post.pk %}">
+                                    <img class="fa-solid fa-trash-can ms-3" alt="rimuovi">
+                                </a>
+                            {% endif %}
+                        </p>        
+                    </div>
+                {% endif %}    
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-2 col-4">
+                            
+                            <!-- author -->
+                            <p class="mb-0">
+                                <a href="{% url 'user_profile' username=post.autore_post.username %}">
+                                    <strong>{{ post.autore_post }}</strong>
+                                </a>
+                            </p>
+                            
+                            <!-- date of membership -->
+                            <p class="text-muted mb-0">
+                                Utente da: {{ post.autore_post.date_joined|date:"M Y" }}
+                            </p>
+                            
+                            <!-- number of posts -->
+                            <p class="text-muted mb-0">
+                                Posts: {{ post.autore_post.posts.count }}
+                            </p>
+                        </div>
+                        <div class="col-xl-10 col-8">
+                            <p class="my-0">{{ post.contenuto|linebreaks }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endfor %}
+
+        <!-- pagination -->
+        <div class="text-end">
+            <span class="step-links">
+                {% if posts_discussione.has_previous %}
+                    <a href="?page=1">&laquo; prima</a>
+                    <a href="?page={{ posts_discussione.previous_page_number }}">precedente</a>
+                {% endif %}
+        
+                <span class="current">
+                    Pagina {{ posts_discussione.number }} di {{ posts_discussione.paginator.num_pages }}.
+                </span>
+        
+                {% if posts_discussione.has_next %}
+                    <a href="?page={{ posts_discussione.next_page_number }}">successiva</a>
+                    <a href="?page={{ posts_discussione.paginator.num_pages }}">ultima &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+        
+        <!-- reply form only for 'User' -->
+        {% if request.user.is_authenticated %}
+            {% include 'forum/form_risposta.html' %}
+            
+            {% else %}
+                <div class="alert alert-info pt-4" role="alert">
+                    <p>
+                        Per partecipare alla discussione devi prima 
+                        effettuare il 
+                        <a href="{% url 'login' %}?next={{ request.get_full_path }}">login</a>
+                    </p>
+                </div>
+        {% endif %}
+    {% endblock content %}
